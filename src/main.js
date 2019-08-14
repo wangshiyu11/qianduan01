@@ -3,108 +3,56 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-//引入jQuery
-import $ from 'jquery'
-Vue.prototype.$=$
-//全局配置的访问服务端的域名
-import domain from './domain.js'
+Vue.config.productionTip = false
+
+//引入定义的全局变量
+import gloable from './store/gloable'
 //存入全局备用
-Vue.prototype.domain=domain
+Vue.prototype.domain=gloable
 
-//AES加密
-import utils from '@/js/utils.js'
-Vue.prototype.toAes=utils
+//引入elementUI
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+Vue.use(ElementUI)
 
-//配置Axios
-import vueAxios from 'axios'
+//引入axios
+import axios from 'axios'
+Vue.prototype.$axios=axios
+// 允许携带cookie
+axios.defaults.withCredentials=true
 
-//默认当axios进行跨域请求的时候是不会携带Cookies的
-//设置vueAxios.defaults.withCredentials的值为true则跨域的时候会带上cookie
-vueAxios.defaults.withCredentials = true;
+//引入cookie插件
+import Cookies from 'js-cookie'
+Vue.prototype.Cookies=Cookies
 
-//为axios添加一个请求拦截器start
-vueAxios.interceptors.request.use((config)=>{
-  //使用拦截器发送前携带上JWT token参数
-  let token=window.localStorage.getItem("token");
-  config.headers['Authorization']=token
-  return config;
-},(error)=>{
-  return Promise.reject(error)
-})
-//为axios添加一个请求拦截器end
-
-//设置一个响应拦截器用来刷新token信息start
-vueAxios.interceptors.response.use((response)=>{
-
-  let yy=response.headers['authorization'];
-
-  if(yy!=undefined){
-    //重新设置localStorge中的token的值，用来刷新tocken
-    window.localStorage.setItem("token",yy)
-  }
-  return response;
-},(error)=>{
-  //失败跳转到登录界面
-  router.replace({
-    path: '/',
-    query: {redirect: router.currentRoute.fullPath}
-  })
-})
-//设置一个响应拦截器end
-
-//添加路由拦截，拦截路由权限start
-router.beforeEach((to,from,next)=>{
-  //判断是否登录 to.meta.require是true说明需要进行登录的验证
-  if(to.meta.require){
-    //获取本地存储中的jwt token
-    let token=window.localStorage.getItem("token");
-    if(token!=null){
-      next();
-    }else{
-      next({path:"/"});//跳转到登录页面
-    }
-  }else{
-    //否则说明不需要进行登录的验证
-    next();
-  }
-  //判断是否在权限列表中
-
-});
-
-//添加路由拦截，拦截路由权限end
-
-//将axios存储在全局的VUe中然后就可以用this.的方式去掉用
-Vue.prototype.$axios=vueAxios
-
-
-
+//引入VUEX
+import store from './store/store'
 
 //自己导入的小图片
 import './assets/font/iconfont.css'
 import './assets/xiaotubiao/iconfont.css'
-//vue的样式配置start
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css';
-Vue.use(ElementUI)
-//vue的样式配置end
 
-Vue.config.productionTip = false
+//路由拦截
+router.beforeEach((to, from, next)=>{
+    next();
 
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  router,
-  components: { App },
-  template: '<App/>'
 })
 
+//请求拦截器
+axios.interceptors.request.use((config)=>{
 
-/* 引入UEditer start */
-import '../static/UE/ueditor.config.js'
-import '../static/UE/ueditor.all.min.js'
-import '../static/UE/lang/zh-cn/zh-cn.js'
-import '../static/UE/ueditor.parse.min.js'
-/* 引入UEditer end*/
+  if(config.url.includes("getCode")){//如果是获取验证码的路径
+    //没有Cookie的话添加Cookie
+    let aucokie=Cookies.get("authcode")
+    if(aucokie==null){
+      Cookies.set("authcode","",{path:"/",domain:"localhost",age:-1})
+    }
+  }
+
+config.headers.token = store.state.token
+  return config;
+})
+
 //音频文件的使用
 import yinpin from '../static/tishiyin/tishiyin.mp3'
 import aiya from '../static/tishiyin/aiya.mp3'
@@ -125,5 +73,16 @@ Vue.prototype.playAudio = (id,yinyue) => {
   if(yinyue=="qingsong"){
     buttonAudio.setAttribute('src',qingsong)
   }
+
   buttonAudio.play()
 }
+
+
+/* eslint-disable no-new */
+new Vue({
+  el: '#app',
+  router,
+  store,
+  components: { App },
+  template: '<App/>'
+})
