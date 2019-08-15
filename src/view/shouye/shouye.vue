@@ -81,6 +81,7 @@
 <script>
   import mymenu from './datamenu.vue'
   import mymain from './datamain.vue'
+  import {delCookie} from "../../utils/util";
 
   const userinfo={};
 
@@ -164,6 +165,7 @@
             alert(map)
             this.$axios.post(this.domain.ssoserverpath+"loginout",map).then((response)=>{
               if(response.data.code==200){
+                delCookie("loginName");
                 window.sessionStorage.clear();
                 this.$router.push({path:'/'});
               }

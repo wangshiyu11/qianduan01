@@ -94,10 +94,15 @@
         </el-table-column>
         <el-table-column
           label="操作">
+
           <template slot-scope="scope">
             <el-row>
-              <el-button size="small" type="danger" icon="el-plus" v-on:click="del(scope.row)">删除</el-button>
+              <span v-if="scope.row.leval <= user.leval"><el-button><span style="color: #ff4373;">无权利进行操作</span></el-button></span>
+              <span v-else>
+                <el-button size="small" type="danger" icon="el-plus" v-on:click="del(scope.row)">删除</el-button>
               <el-button size="small" type="primary" icon="el-plus"  v-on:click="bangding(scope.row)">绑定权限</el-button>
+              </span>
+
             </el-row>
           </template>
         </el-table-column>
@@ -141,17 +146,24 @@
               label: 'menuName',
               code:'leval'
             },
-            ids:""//获取树形菜单的所有id
+            ids:"",//获取树形菜单的所有id
+            userid:window.sessionStorage.getItem("userid"),
+            user:{},
+            formEntity:{},
+            formRole:{}
           }
       },
       mounted() {
         this.testPage();
-        axios.post(this.domain.serverpath+"menuList").then((res)=>{
-          this.menuData=res.data;
+        //this.pageInfo.id=this.userid;
+
+
+        this.formEntity.id=this.userid
+        axios.post(this.domain.serverpath+"selectRoleByUser",this.formEntity).then((res)=>{
           console.log(res.data)
-        }).catch((err) => {
-          this.$message.error('无此操作权限！');
+          this.user=res.data;
         })
+
       },
       methods:{
         handleSelectionChange(val) {
@@ -168,9 +180,11 @@
           this.testPage();
         },
         testPage(){
+          //this.pageInfo.id=this.userid;
+          //alert(this.pageInfo.id)
           axios.post(this.domain.serverpath+"roleByPage",this.pageInfo).then((res)=>{
+            console.log(res.data);
             this.tableData=res.data.list;
-            console.log(res.data.list);
             this.total=res.data.total;
           }).catch((err) => {
             this.$message.error('无此操作权限！');
@@ -181,8 +195,11 @@
           this.form={id:0};
         },
         add(){
+          this.form.leval = this.user.leval+1;
+          this.form.parentId=this.user.id;
+
           axios.post(this.domain.serverpath+"addRole",this.form).then((res)=>{
-            if(res.data>0){
+            if(res.data.code=200){
               alert("添加成功")
               this.testPage();
             }else{
@@ -208,6 +225,13 @@
           }
         },
         bangding(thedate){
+          this.formRole.roleid=this.user.id
+          axios.post(this.domain.serverpath+"menuList",this.formRole).then((res)=>{
+            this.menuData=res.data;
+            console.log(res.data)
+          }).catch((err) => {
+            this.$message.error('无此操作权限！');
+          });
          this.dialogFormVisible1=true;
          this.form1=thedate;
           setTimeout(()=>{

@@ -11,9 +11,11 @@
     <div style="width:50%;float: left">
       <el-card class="box-card" >
         <div slot="header" class="clearfix">
-          <span style="font-weight:bold">新闻公告</span>
+          <span style="font-weight:bold">汇总统计</span>
+          <!-- 每日登录人数统计折线图 -->
+          <div id="main" style="width: 600px;height: 400px;"></div>
         </div>
-        <div  class="text item">
+        <div class="text item">
           内容
         </div>
       </el-card>
@@ -113,6 +115,8 @@
 </template>
 
 <script>
+  import echarts from 'echarts'
+  import axios from 'axios'
   export default {
     name: "system",
     data(){
@@ -121,7 +125,62 @@
         styleel:{
           left:'200%'
         },
+        charts: '',
+        opinion: [],
+        opinionData: []
       }
+    },
+    methods:{
+      drawLine(id) {
+        this.charts = echarts.init(document.getElementById(id));
+        this.charts.setOption({
+          tooltip: {
+            trigger: 'axis'
+          },
+          legend: {
+            data: ['今日登陆人数']
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+
+          toolbox: {
+            feature: {
+              saveAsImage: {}
+            }
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: this.opinion
+
+          },
+          yAxis: {
+            type: 'value'
+          },
+
+          series: [{
+            name: '今日登陆人数',
+            type: 'line',
+            stack: '总数',
+            data: this.opinionData
+          }]
+        })
+      }
+    },
+    mounted() {
+      axios.post(this.domain.ssoserverpath+"selectzhexian").then((res)=>{
+        this.opinion=res.data.result.date;
+        this.opinionData=res.data.result.num;
+        this.$nextTick(function() {
+
+          this.drawLine('main')
+
+        });
+      })
     }
   }
 </script>

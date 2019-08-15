@@ -81,7 +81,7 @@
       },
       methods:{
           formMenu(){
-            axios.post(this.domain.serverpath+"menuList").then((res)=>{
+            axios.post(this.domain.serverpath+"menuByList").then((res)=>{
               this.menuData=res.data;
               console.log(res.data)
             }).catch((err) => {

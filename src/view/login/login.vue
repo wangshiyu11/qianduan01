@@ -35,6 +35,7 @@
 
         <div class="login-btn">
           <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
+          <el-checkbox v-model="ruleForm.type">7天免登陆</el-checkbox>
         </div>
         <!-- 登录进度 -->
         <el-progress ref="jindu" :style="jindustyle"  :text-inside="true"
@@ -51,6 +52,7 @@
 </template>
 
 <script>
+  import {setCookie,getCookie} from "@/utils/util";
   export default {
     name: "login",
     data(){
@@ -69,7 +71,8 @@
         },
         ruleForm: {
           username:'zhangsan',
-          password:'123456'
+          password:'123456',
+          type:false,
         },
         rules: {
           username: [
@@ -137,6 +140,16 @@
 
               this.$store.state.userInfo=response.data.result
               console.log(this.$store.state.userInfo)
+              //存储token到vuex中，
+              let token=respo.token;
+              let status=this.ruleForm.type;
+              if(status){
+                setCookie("loginName",this.ruleForm.username,7);
+                setCookie("password",this.ruleForm.password,7);
+              }else {
+                setCookie("tocken",token);
+              }
+              window.sessionStorage.setItem("userid",respo.result.id)
               window.sessionStorage.setItem("username",respo.result.userName)              //关闭加载窗
               this.$data.percent=100
               //隐藏进度条
@@ -283,6 +296,13 @@
       //参数 url 访问参数
       this.$axios.post(this.domain.ssoserverpath+'getCode').then((response)=>{
         code=response.data.result;
+        //查看用户是否登陆
+        if(getCookie("loginName") != null && getCookie("password")){
+          this.$refs.coderef.value = response.data.result
+          this.ruleForm.username = getCookie("loginName")
+          this.ruleForm.password = getCookie("password")
+          this.submitForm('ruleForm')
+        }
         //向浏览器写一个Cookie
         //document.cookie = 'testCookies' + "=" + response.data.token + "; " + -1;
         _this.moveCode(code,_this);
