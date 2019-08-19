@@ -17,6 +17,11 @@
     },
     methods:{
 
+    },
+    mounted() {
+      window.addEventListener("unload",()=>{
+        sessionStorage.setItem("state",JSON.stringify(this.$store.state))
+      })
     }
   }
 </script>

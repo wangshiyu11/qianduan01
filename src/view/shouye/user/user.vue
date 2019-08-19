@@ -105,7 +105,9 @@
           <el-form>
             <el-form-item>
               <el-row>
-                <el-button size="small" icon="el-icon-plus" type="primary" @click="addUser()">添加新用户</el-button>
+                <span :hidden="tianjia">
+                  <el-button size="small" icon="el-icon-plus" type="primary" @click="addUser()" hidden="hidden">添加新用户</el-button>
+                </span>
                 <el-button size="small" icon="el-icon-plus" type="primary" @click="export2Excel()">导出数据</el-button>
               </el-row>
             </el-form-item>
@@ -153,7 +155,7 @@
                 width="200"
                 trigger="hover">
                 <p>
-                  <el-avatar :src="'http://localhost:8090/'+scope.row.url"></el-avatar>
+                  <el-avatar :src="'http://49.232.19.36:8888/group1/'+scope.row.url+'.png'"></el-avatar>
                 </p>
                 <p>用户名: {{ scope.row.userName }}</p>
                 <p>登录名: {{ scope.row.loginName }}</p>
@@ -191,7 +193,7 @@
             label="图片路径">
             <template  slot-scope="scope">
               <div>
-                <el-avatar :src="'http://localhost:8090/'+scope.row.url"></el-avatar>
+                <el-avatar :src="'http://49.232.19.36:8888/group1/'+scope.row.url+'.png'" ></el-avatar>
               </div>
             </template>
           </el-table-column>
@@ -204,9 +206,15 @@
             width="300px">
             <template slot-scope="scope">
               <el-row>
-                <el-button size="small" type="primary" icon="el-plus" plain v-on:click="update(scope.row)">编辑</el-button>
-                <el-button size="small" type="danger" icon="el-plus" v-on:click="del(scope.row)">删除</el-button>
-                <el-button size="small" type="primary" icon="el-plus"  v-on:click="bangding(scope.row.id)">绑定角色</el-button>
+                <span :hidden="bianji">
+                  <el-button size="small" type="primary" icon="el-plus" plain v-on:click="update(scope.row)" hidden="hidden">编辑</el-button>
+                </span>
+                <span :hidden="shanchu">
+                <el-button size="small" type="danger" icon="el-plus" v-on:click="del(scope.row)" hidden="hidden">删除</el-button>
+                  </span>
+                <span :hidden="bangdinguser">
+                <el-button size="small" type="primary" icon="el-plus"  v-on:click="bangding(scope.row.id)" hidden="hidden">绑定角色</el-button>
+                  </span>
               </el-row>
             </template>
           </el-table-column>
@@ -317,15 +325,38 @@
                 { pattern: /^1[3456789]\d{9}$/, message: '请输入正确的手机号' }
               ],
             },
-            activeName: 'first'
+            activeName: 'first',
+            shachu:false,
+            tianjia:false,
+            bianji:false,
+            bangdinguser:false
           }
       },
       mounted(){
+          let map=this.$store.state.userInfo.authmap;
+          // ,alert(map["update"])
+          if(map["del"]==""){
+              this.shanchu=false
+          }else if (map["del"]==null){
+            this.shanchu=true
+          } if(map["update"]==""){
+            this.bianji=false
+        }else if(map["update"]==null){
+          this.bianji=true
+        }if(map["bangdingRole"]==""){
+           this.bangdinguser=false
+        }else if(map["bangdingRole"]==null){
+            this.bangdinguser=true
+        }if(map["add"]==""){
+          this.tianjia=false
+        }else if(map["add"]==null){
+          this.tianjia=true
+        };
 
         axios.post(this.domain.serverpath+"liebiaoRole").then((res)=>{
           console.log(res.data)
           this.liebiaoRole=res.data;
-        }),
+        });
 
         this.testPage();
       },
@@ -360,7 +391,7 @@
 
         update(thedate){
           this.dialogFormVisible1=true;
-          this.imageUrl='http://localhost:8090/'+thedate.url;
+          this.imageUrl='http://49.232.19.36:8888/group1/'+thedate.url+'.png';
           this.form=thedate;
         },
 
@@ -372,7 +403,7 @@
           axios.post(url,this.form).then((res)=>{
 
             if(res.data>0){
-              this.testPage(1);
+              this.testPage();
             }else{
               alert("操作失败")
             }

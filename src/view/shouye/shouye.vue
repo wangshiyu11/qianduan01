@@ -27,7 +27,7 @@
               <el-dropdown-item command="b">退出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <span ref="userinfo_username">{{this.$data.username}}</span>
+          <span ref="userinfo_username">{{username}}</span>
           <!--<span>
             <el-avatar :src="'http://localhost:8090/'+this.$data.url"></el-avatar>
           </span>-->
