@@ -36,6 +36,7 @@
               <img v-if="imageUrl" :src="imageUrl" class="avatar">
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
+
             <el-form-item label="用户名" :label-width="formLabelWidth">
               <el-input v-model="form.userName" autocomplete="off"  size="small" ></el-input>
             </el-form-item>
@@ -48,12 +49,7 @@
                 <el-radio :label="1">女</el-radio>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="密码" :label-width="formLabelWidth">
-              <el-input v-model="form.password" autocomplete="off"  size="small"></el-input>
-            </el-form-item>
-            <el-form-item label="确认密码" :label-width="formLabelWidth">
-              <el-input v-model="form.password" autocomplete="off"  size="small"></el-input>
-            </el-form-item>
+
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible1 = false">取 消</el-button>
@@ -126,9 +122,9 @@
             <el-select v-model="pageInfo.xingbie" placeholder="请选择">
               <el-option
                 v-for="item in options"
-                :key="item.lable"
-                :label="item.value"
-                :value="item.lable">
+                :key="item.label"
+                :label="item.label"
+                :value="item.value">
               </el-option>
             </el-select>
           </el-form-item>
@@ -155,7 +151,7 @@
                 width="200"
                 trigger="hover">
                 <p>
-                  <el-avatar :src="'http://49.232.19.36:8888/group1/'+scope.row.url+'.png'"></el-avatar>
+                  <el-image  :src="'http://49.232.19.36:8888/group1/'+scope.row.url+'_50x50.png'" style="height: 50px;width: 50px"></el-image>
                 </p>
                 <p>用户名: {{ scope.row.userName }}</p>
                 <p>登录名: {{ scope.row.loginName }}</p>
@@ -193,7 +189,7 @@
             label="图片路径">
             <template  slot-scope="scope">
               <div>
-                <el-avatar :src="'http://49.232.19.36:8888/group1/'+scope.row.url+'.png'" ></el-avatar>
+                <el-image  :src="'http://49.232.19.36:8888/group1/'+scope.row.url+'_50x50.png'" style="height: 50px;width: 50px"></el-image>
               </div>
             </template>
           </el-table-column>
@@ -281,7 +277,7 @@
               value:'',
               label:'全部',
             }, {
-              value: '0',
+              value:'0',
               label: '男'
             },
               {
@@ -293,7 +289,8 @@
             dialogFormVisible2:false,
             formLabelWidth:'80px',
             form:{
-              repassword:""
+              repassword:"",
+              url:"",
             },
             fileList:[],
             total:10,
@@ -329,10 +326,11 @@
             shachu:false,
             tianjia:false,
             bianji:false,
-            bangdinguser:false
+            bangdinguser:false,
           }
       },
       mounted(){
+          //隐藏按钮
           let map=this.$store.state.userInfo.authmap;
           // ,alert(map["update"])
           if(map["del"]==""){
@@ -377,7 +375,7 @@
         testPage(){
           axios.post(this.domain.serverpath+"userByList",this.pageInfo).then((res)=>{
             this.tableData=res.data.list;
-            console.log(res.data.list);
+            console.log(res.data);
             this.total=res.data.total;
           }).catch((err) => {
             this.$message.error('无此操作权限！');
@@ -392,6 +390,7 @@
         update(thedate){
           this.dialogFormVisible1=true;
           this.imageUrl='http://49.232.19.36:8888/group1/'+thedate.url+'.png';
+          alert(this.imageUrl)
           this.form=thedate;
         },
 
@@ -404,6 +403,7 @@
 
             if(res.data>0){
               this.testPage();
+              this.form={};
             }else{
               alert("操作失败")
             }
@@ -415,7 +415,15 @@
         del(row){
           if(confirm("确定要删除吗？")){
             axios.post(this.domain.serverpath+"del",row).then((res)=>{
-              this.testPage();
+              if(res.data.code==200){
+                alert("删除成功")
+                this.testPage();
+              }else{
+                this.$notify.error({
+                  title: '错误',
+                  message: '该用户被绑定,不能删除'
+                })
+              }
             }).catch((err) => {
               this.$message.error('无此操作权限！');
             })
@@ -499,7 +507,7 @@
         },
 
         //导出数据
-      /*  export2Excel() {
+        export2Excel() {
           alert("--------Excel---------")
           require.ensure([], () => {
             const { export_json_to_excel } = require('../../../excel/export2Excel');
@@ -511,7 +519,11 @@
             const data = this.formatJson(filterVal, list);
             export_json_to_excel(tHeader, data, '列表excel');
           })
-        },*/
+        },
+
+        formatJson(filterVal, jsonData) {
+          return jsonData.map(v => filterVal.map(j => v[j]))
+        }
       }
     }
 </script>

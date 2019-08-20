@@ -19,7 +19,8 @@
     "js-cookie": "^2.2.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.7",
-    "vuex": "^3.1.1"
+    "vuex": "^3.1.1",
+    "xlsx": "^0.15.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
@@ -67,5 +68,18 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ]
+  ],
+  "main": ".postcssrc.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangshiyu11/qianduan01.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wangshiyu11/qianduan01/issues"
+  },
+  "homepage": "https://github.com/wangshiyu11/qianduan01#readme"
 }

@@ -125,7 +125,7 @@
               console.log(res.data.result);
               this.$notify.error({
                 title: '错误',
-                message: '该权限正在被'+res.data.result+'绑定中'
+                message: '该权限正在被绑定中'
               });
               this.formMenu();
               this.dialogFormVisible = false;

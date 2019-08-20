@@ -113,6 +113,15 @@
   export default {
     name: "login",
     data(){
+      var validatePass2 = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请再次输入密码'));
+        } else if (value !== this.ruleForm.pwd) {
+          callback(new Error('两次输入密码不一致!'));
+        } else {
+          callback();
+        }
+      };
       return{
         activeName: 'first',
         show:true,
@@ -135,8 +144,13 @@
           type:false,
           tel:"",
           authcode:"",
-          pwd:"",
-          pwd1:""
+          pwd: [
+            { required: true, message: '请输入密码', trigger: 'blur' },
+          ],
+          pwd1: [
+            { required: true, message: '请输入密码', trigger: 'blur' },
+            { validator: validatePass2, trigger: 'blur' }
+          ],
         },
         count:'',
         time:null,
@@ -146,7 +160,7 @@
           ],
           password: [
             { required: true, message: '请输入密码', trigger: 'blur' }
-          ]
+          ],
         },
         dialogFormVisible:false,
         //存放email

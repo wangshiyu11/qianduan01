@@ -216,6 +216,11 @@
                 if(res.data.code==200){
                   alert("删除成功")
                   this.testPage();
+                }else{
+                  this.$notify.error({
+                    title: '错误',
+                    message: '该角色被用户绑定'
+                  });
                 }
               }).catch((err) => {
                 this.$message.error('无此操作权限！');
